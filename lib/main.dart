@@ -1,42 +1,82 @@
 import 'package:flutter/material.dart';
+import 'product_screen.dart';
+import 'checkout_screen.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Application name
-      title: 'Flutter Hello World',
-      // Application theme data, you can set the colors for the application as
-      // you want
+      title: 'AOCP Shopping App',
       theme: ThemeData(
-        // useMaterial3: false,
         primarySwatch: Colors.blue,
       ),
-      // A widget which will be started on application startup
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: HomeScreen(),
     );
   }
 }
 
-class MyHomePage extends StatelessWidget {
-  final String title;
-  const MyHomePage({super.key, required this.title});  
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+  List<Map<String, dynamic>> _checkoutItems = [];
+
+  static List<Widget> _widgetOptions(
+      List<Map<String, dynamic>> checkoutItems,
+      Function(Map<String, dynamic>) onAddToCheckout,
+      Function(Map<String, dynamic>) onRemoveFromCheckout) {
+    return <Widget>[
+      ProductsScreen(onAddToCheckout: onAddToCheckout),
+      CheckoutScreen(
+          checkoutItems: checkoutItems,
+          onRemoveFromCheckout: onRemoveFromCheckout),
+    ];
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        // The title text which will be shown on the action bar
-        title: Text(title),
-      ),
-      body: Center(
-        child: Text(
-          'Hello, World!',
-        ),
+      appBar: AppBar(title: Text('AOCP Shopping App')),
+      body: _widgetOptions(
+        _checkoutItems,
+        (item) {
+          setState(() {
+            _checkoutItems.add(item);
+          });
+        },
+        (item) {
+          setState(() {
+            _checkoutItems.remove(item);
+          });
+        },
+      )[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag),
+            label: 'Products',
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Checkout',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
       ),
     );
   }
